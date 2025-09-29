@@ -1,14 +1,14 @@
-/* server.js */
+/* server.js (Final Corrected Version) */
 
 // --- 1. IMPORTS ---
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-require('dotenv').config(); // To use environment variables from a .env file
+require('dotenv').config();
 
 // --- 2. INITIALIZATION ---
 const app = express();
-const PORT = process.env.PORT || 3000; // Use port from .env or default to 3000
+const PORT = process.env.PORT || 3000;
 
 // --- 3. DATABASE CONNECTION ---
 mongoose.connect(process.env.MONGO_URI, {
@@ -18,14 +18,11 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('✅ MongoDB connected successfully.'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-
 // --- 4. MIDDLEWARE ---
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Body Parsers: To handle JSON and URL-encoded data from forms and AJAX
-app.use(express.json()); // For parsing application/json (used by AJAX in profile.html)
-app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded (used by login/register forms)
-
-// Static File Server: Serve all files from the 'public' directory
+// Serve static files (CSS, client-side JS) from the 'public' directory
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 
@@ -33,29 +30,38 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 const authRoutes = require('./src/routes/auth');
 const jobRoutes = require('./src/routes/jobs');
 
-app.use('/api/auth', authRoutes); // Mount auth routes under /api/auth
-app.use('/api', jobRoutes);      // Mount job/user routes under /api
+app.use('/api/auth', authRoutes);
+app.use('/api', jobRoutes);
 
 
-// --- 6. HTML PAGE SERVING ROUTES ---
-// Serve the main pages directly from the /src/views directory
+// --- 6. PAGE SERVING ROUTES (The Fix) ---
+// This section defines the clean URLs for your application's pages.
+
+// Route for the home page ('/' or '/index')
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'views', 'index.html'));
 });
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'src', 'views', 'index.html'));
+});
 
-app.get('/login.html', (req, res) => {
+// Route for the login page
+app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'views', 'login.html'));
 });
 
-app.get('/register.html', (req, res) => {
+// Route for the register page
+app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'views', 'register.html'));
 });
 
-app.get('/feed.html', (req, res) => {
+// Route for the job feed
+app.get('/feed', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'views', 'feed.html'));
 });
 
-app.get('/profile.html', (req, res) => {
+// Route for the profile page
+app.get('/profile', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'views', 'profile.html'));
 });
 
