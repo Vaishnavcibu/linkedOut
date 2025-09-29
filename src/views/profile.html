@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - LinkedOut</title>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../public/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container navbar">
+            <a href="index.html" class="logo"><div class="logo-icon"></div>LinkedOut</a>
+            <ul class="nav-links">
+                <li><a href="feed.html">Feed</a></li>
+                <li><a href="profile.html" class="active">Profile</a></li>
+            </ul>
+            <div class="nav-buttons">
+                <a href="index.html" class="btn btn-login">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container" style="max-width: 800px;">
+            <h2 class="page-title">My Profile</h2>
+            <div class="glass-card">
+                <form id="profile-form" novalidate>
+                    <!-- Form message container for AJAX responses -->
+                    <div id="form-message" style="margin-bottom: 1.5rem; text-align: center; font-weight: 500;"></div>
+
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" class="form-control" value="Alex Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" class="form-control" value="alex.doe@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="skills">My Skills (Comma separated)</label>
+                        <textarea id="skills" class="form-control" rows="4" placeholder="e.g., Python, JavaScript, React, SQL">JavaScript, React, Node.js, MongoDB, HTML, CSS</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="resume">Upload Resume (PDF)</label>
+                        <input type="file" id="resume" class="form-control" accept=".pdf">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <!-- jQuery CDN (MUST be before your custom script) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Custom jQuery/AJAX script for this page -->
+    <script>
+        // Wait for the document to be fully loaded
+        $(document).ready(function() {
+
+            // Intercept the form submission
+            $('#profile-form').on('submit', function(event) {
+                event.preventDefault(); // Prevent the default browser reload
+
+                const $formMessage = $('#form-message');
+                const $submitButton = $(this).find('button[type="submit"]');
+
+                // Get form data
+                const profileData = {
+                    name: $('#name').val(),
+                    email: $('#email').val(),
+                    skills: $('#skills').val()
+                };
+                
+                // --- AJAX Request ---
+                $.ajax({
+                    url: '/api/user/profile', // The backend endpoint to handle the update
+                    type: 'POST',
+                    contentType: 'application/json', // Tell the server we're sending JSON
+                    data: JSON.stringify(profileData), // Convert JS object to JSON string
+                    
+                    beforeSend: function() {
+                        // Disable button and show loading state
+                        $submitButton.prop('disabled', true).text('Updating...');
+                        $formMessage.empty().css('color', 'var(--text-muted-color)').text('Sending data...');
+                    },
+                    
+                    success: function(response) {
+                        // Handle a successful response from the server
+                        $formMessage.css('color', 'var(--success-color)').text(response.message);
+                    },
+
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        // Handle any errors (e.g., server error, network issue)
+                        let errorMessage = 'An unknown error occurred. Please try again.';
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                            errorMessage = jqXHR.responseJSON.message;
+                        }
+                        $formMessage.css('color', 'var(--error-color)').text(errorMessage);
+                    },
+
+                    complete: function() {
+                        // This runs after success or error
+                        // Re-enable the button after 2 seconds
+                        setTimeout(function() {
+                            $submitButton.prop('disabled', false).text('Update Profile');
+                        }, 2000);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

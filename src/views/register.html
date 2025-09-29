@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - LinkedOut</title>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../public/css/style.css">
+    <style>
+        /* Reusing auth page styles from login.html */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container navbar">
+            <a href="index.html" class="logo"><div class="logo-icon"></div>LinkedOut</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+            </ul>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-login">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="auth-container">
+        <div class="glass-card auth-card">
+            <h2 class="page-title" style="margin-bottom: 2rem;">Create Your Account</h2>
+            
+            <!-- The action attribute will point to the backend register route -->
+            <form action="/api/auth/register" method="POST">
+                
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="e.g., Alex Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 8 characters" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userType">I am a...</label>
+                    <select id="userType" name="userType" class="form-control">
+                        <option value="student">Student / Fresher</option>
+                        <option value="recruiter">Company / Recruiter</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; margin-top: 1rem;">Sign Up</button>
+            
+                <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted-color);">
+                    Already have an account? <a href="login.html" style="color: var(--primary-color); text-decoration: none;">Log In</a>
+                </p>
+            </form>
+        </div>
+    </main>
+
+    <!-- General purpose JavaScript file for header consistency -->
+    <script src="../public/js/main.js"></script>
+</body>
+</html>

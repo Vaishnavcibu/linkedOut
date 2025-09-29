@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedOut - Find Your Next Opportunity</title>
+    <!-- Link to the main stylesheet -->
+    <link rel="stylesheet" href="../public/css/style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="container navbar">
+            <a href="index.html" class="logo"><div class="logo-icon"></div>LinkedOut</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-login">Login</a>
+                <a href="register.html" class="btn btn-register">Register</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" style="padding-top: 150px; padding-bottom: 100px; text-align: center;">
+            <div class="container">
+                <span class="hero-tag" style="display: inline-block; padding: 0.3rem 1rem; border: 1px solid var(--border-color); border-radius: 20px; margin-bottom: 1.5rem; font-size: 0.8rem; backdrop-filter: blur(5px);">
+                    AI-Powered Job Matching for Students & Freshers
+                </span>
+                <h1 class="hero-title" style="font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.2;">
+                    Swipe Right on Your <span class="highlight" style="color: #C4B5FD;">Dream Career</span>.
+                </h1>
+                <p class="hero-subtitle" style="font-size: 1.1rem; color: var(--text-muted-color); max-width: 600px; margin: 0 auto 2.5rem auto;">
+                    LinkedOut connects you with internships and entry-level jobs from top companies and organizations. Just swipe to apply.
+                </p>
+                <a href="register.html" class="btn btn-primary" style="padding: 1rem 2rem; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block;">Get Started for Free</a>
+            </div>
+        </section>
+
+        <section id="features" class="container" style="padding-bottom: 5rem;">
+             <h2 class="page-title">How It Works</h2>
+             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div class="glass-card">
+                    <h3>1. Build Your Profile</h3>
+                    <p style="color: var(--text-muted-color); margin-top: 1rem;">Create your account in minutes and upload your resume. Our AI will analyze your skills and qualifications.</p>
+                </div>
+                <div class="glass-card">
+                    <h3>2. Swipe to Apply</h3>
+                    <p style="color: var(--text-muted-color); margin-top: 1rem;">Get a personalized feed of jobs and internships. Swipe right to apply, left to pass. It's that simple.</p>
+                </div>
+                <div class="glass-card">
+                    <h3>3. Get Noticed</h3>
+                    <p style="color: var(--text-muted-color); margin-top: 1rem;">Companies see your profile when you apply. Our unique system helps you stand out from the crowd.</p>
+                </div>
+             </div>
+        </section>
+
+        <section id="faq" class="faq" style="padding: 5rem 0; text-align: center; max-width: 800px; margin: 0 auto;">
+            <div class="container">
+                <h2 class="page-title">Frequently Asked Questions</h2>
+                <div class="faq-item glass-card" style="padding: 0; margin-bottom: 1rem; text-align: left;">
+                    <div class="faq-question" style="padding: 1.5rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        What kind of jobs can I find?
+                        <span class="faq-icon" style="transition: transform 0.3s ease;">+</span>
+                    </div>
+                    <div class="faq-answer" style="padding: 0 1.5rem; max-height: 0; overflow: hidden; transition: all 0.4s ease-out;">
+                        <p style="padding-bottom: 1.5rem; color: var(--text-muted-color);">You can find a wide range of opportunities, including software development internships, marketing roles for freshers, volunteer work with organizations like IEEE, and more.</p>
+                    </div>
+                </div>
+                <div class="faq-item glass-card" style="padding: 0; margin-bottom: 1rem; text-align: left;">
+                    <div class="faq-question" style="padding: 1.5rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        Is LinkedOut free for students?
+                        <span class="faq-icon" style="transition: transform 0.3s ease;">+</span>
+                    </div>
+                    <div class="faq-answer" style="padding: 0 1.5rem; max-height: 0; overflow: hidden; transition: all 0.4s ease-out;">
+                        <p style="padding-bottom: 1.5rem; color: var(--text-muted-color);">Yes! Our core features for students and job seekers are completely free. We are committed to helping you launch your career.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="footer" style="padding: 4rem 0 2rem; border-top: 1px solid var(--border-color);">
+        <div class="container">
+            <p class="copyright" style="text-align: center; color: var(--text-muted-color); font-size: 0.9rem;">
+                Copyright 2024 LinkedOut | All Rights Reserved
+            </p>
+        </div>
+    </footer>
+    
+    <!-- General purpose JavaScript file -->
+    <script src="../public/js/main.js"></script>
+    <script>
+        // Inline script to fixup FAQ styles since they were moved from original file
+        document.querySelectorAll('.faq-icon').forEach(icon => {
+            icon.style.width = '24px';
+            icon.style.height = '24px';
+            icon.style.borderRadius = '50%';
+            icon.style.backgroundColor = 'rgba(0,0,0,0.2)';
+            icon.style.display = 'flex';
+            icon.style.justifyContent = 'center';
+            icon.style.alignItems = 'center';
+        });
+        document.querySelectorAll('.faq-item.active .faq-answer').forEach(answer => answer.style.maxHeight = '200px');
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "linkedout",
+  "version": "1.0.0",
+  "description": "AI-powered job finding app for students and freshers.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vaishnavcibu/linkedOut.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "mongoose": "^6.13.8"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}

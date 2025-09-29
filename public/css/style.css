@@ -1,0 +1,192 @@
+/* public/css/style.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* CSS Variables for easy theme management */
+:root {
+    --primary-color: #7C3AED;
+    --background-color: #0F1021;
+    --card-background: rgba(30, 32, 56, 0.5); /* Semi-transparent for glass effect */
+    --text-color: #FFFFFF;
+    --text-muted-color: #A0AEC0;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --purple-glow: rgba(124, 58, 237, 0.3);
+    --success-color: #34D399;
+    --error-color: #F87171;
+}
+
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Reusable Components --- */
+
+/* Header & Navigation */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(15, 16, 33, 0.8);
+    backdrop-filter: blur(10px); /* Core glassmorphism style */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+    padding: 1rem 0;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    margin-right: 0.75rem;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-links a {
+    color: var(--text-muted-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--text-color);
+}
+
+.nav-links a.active {
+    background-color: var(--card-background);
+    border-radius: 20px;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.btn-login {
+    border-color: var(--border-color);
+    color: var(--text-color);
+    background: transparent;
+}
+
+.btn-login:hover {
+    background-color: var(--card-background);
+}
+
+.btn-register, .btn-primary {
+    background: linear-gradient(90deg, #9F7AEA, #7C3AED);
+    color: var(--text-color);
+    border: none;
+}
+
+.btn-register:hover, .btn-primary:hover {
+    box-shadow: 0 0 15px var(--purple-glow);
+}
+
+
+/* Cards & Forms (Glassmorphism) */
+.glass-card {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted-color);
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--purple-glow);
+}
+
+/* Main Content Area */
+main {
+    padding-top: 100px; /* To offset the fixed header */
+    padding-bottom: 4rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Simplification for mobile, can be replaced with a hamburger menu */
+    }
+}
