@@ -83,7 +83,7 @@ router.post('/login', async (req, res) => {
         // 4. Login successful
         // In a real app, create a session or JWT token
         // For now, we'll redirect to the feed
-        res.redirect('/feed.html');
+        res.redirect('/feed');
 
     } catch (error) {
         console.error('Login error:', error);
