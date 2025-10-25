@@ -6,7 +6,8 @@
 :root {
     --primary-color: #7C3AED;
     --background-color: #0F1021;
-    --card-background: rgba(30, 32, 56, 0.5); /* Semi-transparent for glass effect */
+    /* Semi-transparent for glass effect */
+    --card-background: rgba(30, 32, 56, 0.5);
     --text-color: #FFFFFF;
     --text-muted-color: #A0AEC0;
     --border-color: rgba(255, 255, 255, 0.1);
@@ -129,7 +130,6 @@ body {
 .btn-register:hover, .btn-primary:hover {
     box-shadow: 0 0 15px var(--purple-glow);
 }
-
 
 /* Cards & Forms (Glassmorphism) */
 .glass-card {

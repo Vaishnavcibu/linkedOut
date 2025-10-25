@@ -3,99 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Job Feed - LinkedOut</title>
-    <!-- Shared Styles -->
+    <title>Job Feed | LinkedOut</title>
     <link rel="stylesheet" href="../public/css/style.css">
-    <!-- Page-Specific Styles -->
     <link rel="stylesheet" href="../public/css/feed.css">
 </head>
 <body>
     <header class="header">
         <div class="container navbar">
             <a href="/" class="logo"><div class="logo-icon"></div>LinkedOut</a>
-            <ul class="nav-links">
-                <li><a href="/feed" class="active">Feed</a></li>
-                <li><a href="/profile">Profile</a></li>
-            </ul>
-            <div class="nav-buttons">
-                <!-- This would eventually log the user out -->
-                <a href="/" class="btn btn-login">Logout</a>
-            </div>
+            <ul class="nav-links"></ul> <!-- Dynamic -->
+            <div class="nav-buttons"></div> <!-- Dynamic -->
         </div>
     </header>
 
     <main class="feed-container">
         <div class="swipe-deck">
-            <!-- 
-                These are example cards.
-                In a real application, you would generate these dynamically
-                from data fetched from your backend API.
-                The 'id' attribute is important for identifying the job.
-            -->
-            <div class="swipe-card" id="job-3">
-                <div class="card-content">
-                    <h3 class="job-title">Data Science Fresher</h3>
-                    <p class="company-name">Amazon</p>
-                    <div class="job-details">
-                        <p>📍 Location: Seattle, WA</p>
-                        <p>🕒 Type: Full-Time</p>
-                        <p>💰 Salary: $120,000/year</p>
-                    </div>
-                    <div class="job-skills">
-                        <span>Python</span>
-                        <span>SQL</span>
-                        <span>Machine Learning</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="swipe-card" id="job-2">
-                 <div class="card-content">
-                    <h3 class="job-title">Web Development Intern</h3>
-                    <p class="company-name">IEEE Student Chapter</p>
-                    <div class="job-details">
-                        <p>📍 Location: Remote</p>
-                        <p>🕒 Type: Internship (Volunteer)</p>
-                        <p>⏳ Duration: 6 Weeks</p>
-                    </div>
-                    <div class="job-skills">
-                        <span>HTML</span>
-                        <span>CSS</span>
-                        <span>JavaScript</span>
-                        <span>Events</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="swipe-card" id="job-1">
-                <div class="card-content">
-                    <h3 class="job-title">Software Engineer Intern</h3>
-                    <p class="company-name">Google</p>
-                    <div class="job-details">
-                        <p>📍 Location: Mountain View, CA</p>
-                        <p>🕒 Type: Internship</p>
-                        <p>💰 Stipend: $7,500/month</p>
-                    </div>
-                    <div class="job-skills">
-                        <span>JavaScript</span>
-                        <span>Python</span>
-                        <span>Cloud</span>
-                    </div>
-                </div>
-            </div>
-
+            <!-- Cards will be dynamically inserted here -->
         </div>
-
         <div class="swipe-actions">
             <button id="reject" class="action-btn" aria-label="Reject">❌</button>
             <button id="accept" class="action-btn" aria-label="Accept">✔️</button>
         </div>
     </main>
-    
-    <!-- Hammer.js library for touch gestures (MUST be before swipe.js) -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-    
-    <!-- Custom swipe logic script -->
-    <script src="../public/js/swipe.js"></script>
+    <script src="../public/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deck = document.querySelector('.swipe-deck');
+            const acceptBtn = document.getElementById('accept');
+            const rejectBtn = document.getElementById('reject');
+            let currentCards = [];
+
+            async function fetchAndInitializeCards() {
+                try {
+                    const response = await fetch('/api/jobs/feed');
+                    if (!response.ok) {
+                         // If not authenticated, the middleware redirects. Let's redirect on client too.
+                         if(response.status === 401) window.location.href = '/login';
+                        throw new Error('Failed to fetch jobs');
+                    }
+                    const jobs = await response.json();
+                    deck.innerHTML = ''; 
+
+                    if (jobs.length === 0) {
+                        deck.innerHTML = '<p class="no-more-cards">No more opportunities for now. Check back later!</p>';
+                        return;
+                    }
+
+                    jobs.forEach(job => {
+                        const card = document.createElement('div');
+                        card.className = 'swipe-card';
+                        card.id = job._id;
+                        card.innerHTML = `
+                            <div class="card-content">
+                                <h3 class="job-title">${job.title}</h3>
+                                <p class="company-name">${job.company}</p>
+                                <div class="job-details">
+                                    <p>📍 ${job.location}</p>
+                                    <p>🕒 ${job.jobType}</p>
+                                    ${job.salary && job.salary.details ? `<p>💰 ${job.salary.details}</p>` : ''}
+                                </div>
+                                <div class="job-skills">${job.skillsRequired.map(s => `<span>${s}</span>`).join('')}</div>
+                            </div>`;
+                        deck.appendChild(card);
+                    });
+                    initializeCardEventListeners();
+                } catch (error) {
+                    console.error('Error fetching jobs:', error);
+                    deck.innerHTML = '<p class="no-more-cards">Could not load jobs.</p>';
+                }
+            }
+
+            function initializeCardEventListeners() {
+                currentCards = Array.from(deck.querySelectorAll('.swipe-card'));
+                currentCards.forEach((card, index) => {
+                    card.style.zIndex = currentCards.length - index;
+                    const hammer = new Hammer(card);
+                    hammer.on('pan', e => onPan(e.target, e));
+                    hammer.on('panend', e => onPanEnd(e.target, e));
+                });
+                updateUiStack();
+            }
+
+            function onPan(card, event) {
+                if (!card.classList.contains('is-active')) return;
+                card.classList.add('dragging');
+                card.style.transform = `translateX(${event.deltaX}px) rotate(${event.deltaX / 10}deg)`;
+            }
+
+            function onPanEnd(card, event) {
+                if (!card.classList.contains('is-active')) return;
+                card.classList.remove('dragging');
+                if (Math.abs(event.deltaX) > 120) {
+                    swipeCard(card, event.deltaX > 0 ? 'right' : 'left');
+                } else {
+                    card.style.transform = '';
+                }
+            }
+
+            function swipeCard(card, direction) {
+                if (!card || !currentCards.includes(card)) return;
+                const endX = direction === 'right' ? window.innerWidth : -window.innerWidth;
+                card.style.transform = `translateX(${endX * 1.5}px) rotate(${direction === 'right' ? 30 : -30}deg)`;
+                card.style.opacity = '0';
+                
+                fetch(`/api/jobs/swipe/${card.id}/${direction}`, { method: 'POST' });
+                
+                currentCards = currentCards.filter(c => c !== card);
+                setTimeout(() => card.remove(), 400);
+                updateUiStack();
+
+                if (currentCards.length === 0) {
+                    setTimeout(() => deck.innerHTML = '<p class="no-more-cards">Feed cleared. Check back later!</p>', 500);
+                }
+            }
+            
+            function updateUiStack() {
+                currentCards.forEach((card, index) => {
+                    card.classList.remove('is-active');
+                    if (index === currentCards.length - 1) { // Top
+                        card.style.transform = 'scale(1) translateY(0)';
+                        card.classList.add('is-active');
+                    } else if (index === currentCards.length - 2) { // Middle
+                        card.style.transform = 'scale(0.95) translateY(-20px)';
+                    } else { // Bottom
+                        card.style.transform = 'scale(0.9) translateY(-40px)';
+                    }
+                });
+            }
+
+            acceptBtn.addEventListener('click', () => {
+                if(currentCards.length > 0) swipeCard(currentCards[currentCards.length - 1], 'right');
+            });
+            rejectBtn.addEventListener('click', () => {
+                 if(currentCards.length > 0) swipeCard(currentCards[currentCards.length - 1], 'left');
+            });
+
+            fetchAndInitializeCards();
+        });
+    </script>
 </body>
 </html>

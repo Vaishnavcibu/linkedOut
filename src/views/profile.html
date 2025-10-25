@@ -2,118 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - LinkedOut</title>
-    <!-- Shared Styles -->
+    <title>My Profile | LinkedOut</title>
     <link rel="stylesheet" href="../public/css/style.css">
 </head>
 <body>
     <header class="header">
         <div class="container navbar">
             <a href="/" class="logo"><div class="logo-icon"></div>LinkedOut</a>
-            <ul class="nav-links">
-                <li><a href="/feed">Feed</a></li>
-                <li><a href="/profile" class="active">Profile</a></li>
-            </ul>
-            <div class="nav-buttons">
-                <a href="/" class="btn btn-login">Logout</a>
-            </div>
+            <ul class="nav-links"></ul> <!-- Dynamic -->
+            <div class="nav-buttons"></div> <!-- Dynamic -->
         </div>
     </header>
-
     <main>
-        <div class="container" style="max-width: 800px;">
+        <div class="container" style="padding-top: 100px; max-width: 800px;">
             <h2 class="page-title">My Profile</h2>
             <div class="glass-card">
-                <form id="profile-form" novalidate>
-                    <!-- Form message container for AJAX responses -->
+                <form id="profile-form">
                     <div id="form-message" style="margin-bottom: 1.5rem; text-align: center; font-weight: 500;"></div>
-
                     <div class="form-group">
                         <label for="name">Full Name</label>
-                        <input type="text" id="name" class="form-control" value="Alex Doe" required>
+                        <input type="text" id="name" name="name" class="form-control" required>
                     </div>
-
                     <div class="form-group">
                         <label for="email">Email Address</label>
-                        <input type="email" id="email" class="form-control" value="alex.doe@example.com" required>
+                        <input type="email" id="email" name="email" class="form-control" required>
                     </div>
-
                     <div class="form-group">
                         <label for="skills">My Skills (Comma separated)</label>
-                        <textarea id="skills" class="form-control" rows="4" placeholder="e.g., Python, JavaScript, React, SQL">JavaScript, React, Node.js, MongoDB, HTML, CSS</textarea>
+                        <textarea id="skills" name="skills" class="form-control" rows="4"></textarea>
                     </div>
-                    
                     <div class="form-group">
-                        <label for="resume">Upload Resume (PDF)</label>
-                        <input type="file" id="resume" class="form-control" accept=".pdf">
+                        <label for="resume">Upload Resume (PDF only)</label>
+                        <input type="file" id="resume" name="resume" class="form-control" accept=".pdf">
+                        <p id="current-resume" style="margin-top: 0.5rem; font-size: 0.9rem;"></p>
                     </div>
-
-                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Update Profile</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Update Profile</button>
                 </form>
             </div>
         </div>
     </main>
-    
-    <!-- jQuery CDN (MUST be before your custom script) -->
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-    <!-- Custom jQuery/AJAX script for this page -->
+    <script src="../public/js/main.js"></script>
     <script>
-        // Wait for the document to be fully loaded
-        $(document).ready(function() {
+    $(document).ready(function() {
+        $.get('/api/users/me', function(data) {
+            $('#name').val(data.user.name);
+            $('#email').val(data.user.email);
+            $('#skills').val(data.user.skills.join(', '));
+            if (data.user.resumeUrl) {
+                $('#current-resume').html(`Current Resume: <a href="/${data.user.resumeUrl.replace(/\\/g, '/')}" target="_blank">View</a>`);
+            } else {
+                 $('#current-resume').text('No resume uploaded.');
+            }
+        }).fail(function() {
+            window.location.href = '/login';
+        });
 
-            // Intercept the form submission
-            $('#profile-form').on('submit', function(event) {
-                event.preventDefault(); // Prevent the default browser reload
+        $('#profile-form').on('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const $formMessage = $('#form-message');
 
-                const $formMessage = $('#form-message');
-                const $submitButton = $(this).find('button[type="submit"]');
-
-                // Get form data
-                const profileData = {
-                    name: $('#name').val(),
-                    email: $('#email').val(),
-                    skills: $('#skills').val()
-                };
-                
-                // --- AJAX Request ---
-                $.ajax({
-                    url: '/api/user/profile', // The backend endpoint to handle the update
-                    type: 'POST',
-                    contentType: 'application/json', // Tell the server we're sending JSON
-                    data: JSON.stringify(profileData), // Convert JS object to JSON string
-                    
-                    beforeSend: function() {
-                        // Disable button and show loading state
-                        $submitButton.prop('disabled', true).text('Updating...');
-                        $formMessage.empty().css('color', 'var(--text-muted-color)').text('Sending data...');
-                    },
-                    
-                    success: function(response) {
-                        // Handle a successful response from the server
-                        $formMessage.css('color', 'var(--success-color)').text(response.message);
-                    },
-
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        // Handle any errors (e.g., server error, network issue)
-                        let errorMessage = 'An unknown error occurred. Please try again.';
-                        if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-                            errorMessage = jqXHR.responseJSON.message;
-                        }
-                        $formMessage.css('color', 'var(--error-color)').text(errorMessage);
-                    },
-
-                    complete: function() {
-                        // This runs after success or error
-                        // Re-enable the button after 2 seconds
-                        setTimeout(function() {
-                            $submitButton.prop('disabled', false).text('Update Profile');
-                        }, 2000);
-                    }
-                });
+            $.ajax({
+                url: '/api/users/profile',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $formMessage.css('color', 'var(--success-color)').text(response.message);
+                },
+                error: function(jqXHR) {
+                    $formMessage.css('color', 'var(--error-color)').text(jqXHR.responseJSON.message || 'Update failed.');
+                }
             });
         });
+    });
     </script>
 </body>
 </html>

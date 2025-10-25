@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Company Dashboard | LinkedOut</title>
+    <link rel="stylesheet" href="../public/css/style.css">
+    <style>
+        .job-item-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.2s ease;
+            border-radius: 8px;
+        }
+        .job-item-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .job-item {
+            display: grid; grid-template-columns: 1fr auto auto; gap: 1rem;
+            align-items: center; border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 1rem;
+        }
+         .job-item:last-child { border-bottom: none; }
+         .job-info { line-height: 1.4; }
+    </style>
+</head>
+<body>
+    <header class="header"><!-- ... Dynamic header ... --></header>
+
+    <main class="container" style="padding-top: 100px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1 class="page-title" style="margin: 0;">Your Job Postings</h1>
+            <a href="/post-job" class="btn btn-primary">Post New Job</a>
+        </div>
+        <div id="job-list-container" class="glass-card" style="padding: 1rem;">
+            <!-- Job listings will be dynamically inserted here -->
+        </div>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="../public/js/main.js"></script>
+    <script>
+        function loadJobs() {
+            $.get('/api/jobs/my-jobs', function(jobs) {
+                const jobList = $('#job-list-container');
+                jobList.empty();
+                if (jobs.length === 0) { /* ... no jobs message ... */ }
+
+                jobs.forEach(job => {
+                    // ** CHANGE IS HERE: Each item is now a link **
+                    jobList.append(`
+                        <a href="/job-details/${job._id}" class="job-item-link">
+                            <div class="job-item">
+                                <div class="job-info">
+                                    <h4 style="font-size: 1.2rem;">${job.title}</h4>
+                                    <p style="color: var(--text-muted-color);">${job.location}</p>
+                                </div>
+                                <span class="btn">View Details</span>
+                            </div>
+                        </a>
+                    `);
+                });
+            }).fail(() => window.location.href = '/login');
+        }
+        $(document).ready(loadJobs);
+    </script>
+</body>
+</html>

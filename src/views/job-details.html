@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details | LinkedOut</title>
+    <link rel="stylesheet" href="../public/css/style.css">
+    <style>
+        .details-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+        .applicant-card {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+        .applicant-card:last-child { border-bottom: none; }
+        .skills-list span {
+            display: inline-block; background-color: rgba(255,255,255,0.1);
+            padding: 0.3rem 0.6rem; border-radius: 12px; margin: 0.2rem;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 768px) {
+            .details-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header"><!-- Dynamic Header --></header>
+
+    <main class="container" style="padding-top: 100px;">
+        <div style="margin-bottom: 2rem;">
+            <a href="/company-dashboard" style="color: var(--text-muted-color); text-decoration: none;">&larr; Back to Dashboard</a>
+        </div>
+    
+        <div class="details-grid">
+            <!-- Column 1: Job Details -->
+            <div id="job-details-section">
+                <div class="glass-card">
+                    <h1 id="job-title" class="page-title" style="text-align: left; margin-bottom: 0.5rem;"></h1>
+                    <p id="job-company-location" style="color: var(--text-muted-color); font-size: 1.1rem; margin-bottom: 1.5rem;"></p>
+                    <p id="job-description"></p>
+                    <h3 style="margin-top: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Required Skills</h3>
+                    <div id="job-skills-list" class="skills-list" style="margin-top: 1rem;"></div>
+                     <div style="margin-top: 2rem; text-align: right;">
+                        <a id="edit-job-link" href="#" class="btn btn-primary">Edit Job</a>
+                     </div>
+                </div>
+            </div>
+
+            <!-- Column 2: Application Statistics -->
+            <div>
+                <div class="glass-card">
+                    <h2>Statistics</h2>
+                    <h1 id="application-count" style="font-size: 3rem; margin: 1rem 0;"></h1>
+                    <h4>Applicants</h4>
+                    <div id="applicant-list" style="margin-top: 1rem; max-height: 500px; overflow-y: auto;">
+                        <!-- Applicant cards will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="../public/js/main.js"></script>
+    <script>
+        $(document).ready(function() {
+            const jobId = window.location.pathname.split('/').pop();
+            const $jobDetailsSection = $('#job-details-section');
+            const $applicantList = $('#applicant-list');
+
+            $.get(`/api/jobs/${jobId}/details`, function(data) {
+                // Populate Job Details
+                $jobDetailsSection.find('#job-title').text(data.job.title);
+                $jobDetailsSection.find('#job-company-location').text(`${data.job.company} - ${data.job.location}`);
+                $jobDetailsSection.find('#job-description').text(data.job.description);
+                $jobDetailsSection.find('#job-skills-list').html(data.job.skillsRequired.map(s => `<span>${s}</span>`).join(''));
+                $jobDetailsSection.find('#edit-job-link').attr('href', `/edit-job/${jobId}`);
+
+                // Populate Statistics
+                $('#application-count').text(data.applicationCount);
+
+                // Populate Applicant List
+                if (data.applicants.length === 0) {
+                    $applicantList.html('<p>No applications yet.</p>');
+                } else {
+                    $applicantList.empty();
+                    data.applicants.forEach(applicant => {
+                        $applicantList.append(`
+                            <div class="applicant-card">
+                                <strong>${applicant.name}</strong>
+                                <p style="font-size: 0.9rem; color: var(--text-muted-color);">${applicant.email}</p>
+                                <div class="skills-list" style="margin-top: 0.5rem;">${applicant.skills.map(s => `<span>${s}</span>`).join('')}</div>
+                                <a href="/${applicant.resumeUrl.replace(/\\/g, '/')}" target="_blank" style="margin-top: 0.5rem; display: inline-block;">View Resume</a>
+                            </div>
+                        `);
+                    });
+                }
+            }).fail(function() {
+                $('main').html('<h2 class="page-title">Could not load job details.</h2><p style="text-align: center;"><a href="/company-dashboard">Return to dashboard.</a></p>');
+            });
+        });
+    </script>
+</body>
+</html>

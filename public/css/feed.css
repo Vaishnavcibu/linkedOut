@@ -50,13 +50,15 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    opacity: 0; /* Content is invisible by default */
+    /* Content is invisible by default */
+    opacity: 0;
     transition: opacity 0.3s ease-in-out;
 }
 
 /* ONLY show content for the card with the 'is-active' class */
 .swipe-card.is-active .card-content {
-    opacity: 1; /* Make content visible only on the top card */
+    /* Make content visible only on the top card */
+    opacity: 1;
 }
 
 .job-title {
