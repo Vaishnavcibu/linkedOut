@@ -1,15 +1,17 @@
-/* src/utils/aiHelper.js (Final Corrected Version) */
+/* src/utils/aiHelper.js (Final Corrected Version based on your wrapper) */
 
+// STEP 1: Import the correct SDK package
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs').promises;
 const path = require('path');
 const pdf = require('pdf-parse');
 
+// Initialize the client using your environment variable
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function getTextFromPdf(filePath) {
     try {
-        const fullPath = path.resolve(filePath); // Ensure we have the absolute path
+        const fullPath = path.resolve(filePath);
         const dataBuffer = await fs.readFile(fullPath);
         const data = await pdf(dataBuffer);
         return data.text;
@@ -22,8 +24,10 @@ async function getTextFromPdf(filePath) {
 async function generateApplicationCoverLetter(user, job) {
     const resumeText = user.resumeUrl ? await getTextFromPdf(user.resumeUrl) : 'No resume provided.';
 
+    // Get the generative model
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
+    
+    // Construct the detailed prompt string (same as before)
     const prompt = `
         **Role:** You are a helpful career assistant. Your task is to draft a professional and compelling cover letter for a job application.
 
@@ -51,12 +55,17 @@ async function generateApplicationCoverLetter(user, job) {
     `;
 
     try {
+        // STEP 2 & 3: Use the correct API call and prompt structure
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        return response.text();
+        
+        // Extract the text from the response
+        const generatedText = response.text();
+        return generatedText;
+
     } catch (error) {
-        console.error('Error generating content with AI:', error);
-        return 'There was an error generating the cover letter. Please try again later.';
+        console.error("Error calling Google GenAI API:", error);
+        return "Failed to generate cover letter due to an AI service error. Please try again.";
     }
 }
 
