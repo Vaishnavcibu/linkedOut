@@ -1,94 +1,114 @@
-/* src/routes/auth.js */
-
+/* src/routes/auth.js (Final Corrected Version) */
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user'); // Import the User model
+const User = require('../models/user');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // --- REGISTRATION ROUTE ---
-// Endpoint: POST /api/auth/register
 router.post('/register', async (req, res) => {
-    // Destructure the required fields from the request body
     const { name, email, password, userType } = req.body;
-
-    // Basic validation
     if (!name || !email || !password || !userType) {
-        // In a real app, you might render an error on the page
         return res.status(400).json({ message: 'Please provide all required fields.' });
     }
 
     try {
-        // 1. Check if a user with this email already exists
-        const existingUser = await User.findOne({ email: email });
-        if (existingUser) {
+        let user = await User.findOne({ email });
+        if (user) {
             return res.status(409).json({ message: 'A user with this email already exists.' });
         }
 
-        // 2. (IMPORTANT) In a real app, hash the password here!
-        // const salt = await bcrypt.genSalt(10);
-        // const hashedPassword = await bcrypt.hash(password, salt);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        // 3. Create a new user instance
-        const newUser = new User({
+        user = new User({
             name,
             email,
-            password, // In production, use hashedPassword
+            password: hashedPassword,
             userType
         });
 
-        // 4. Save the new user to the database
-        await newUser.save();
-
-        // 5. Registration successful
-        // In a real app, you would create a session or JWT token here
-        // For now, we will just redirect to the login page with a success message
-        // res.redirect('/login.html?status=success'); // This doesn't work well for APIs
+        await user.save();
         res.status(201).json({ message: 'User registered successfully! Please log in.' });
 
     } catch (error) {
         console.error('Registration error:', error);
-        // Handle validation errors from Mongoose
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: error.message });
-        }
         res.status(500).json({ message: 'Server error during registration.' });
     }
 });
 
-
 // --- LOGIN ROUTE ---
-// Endpoint: POST /api/auth/login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-
     if (!email || !password) {
         return res.status(400).json({ message: 'Please provide both email and password.' });
     }
 
     try {
-        // 1. Find the user by email
-        const user = await User.findOne({ email: email });
+        const user = await User.findOne({ email }).select('+password');
         if (!user) {
-            return res.status(401).json({ message: 'Invalid credentials. User not found.' });
+            return res.status(401).json({ message: 'Invalid credentials.' });
         }
 
-        // 2. (IMPORTANT) In a real app, compare the hashed password
-        // const isMatch = await bcrypt.compare(password, user.password);
-        // if (!isMatch) { ... }
-
-        // 3. Compare the plain text password (for this project only)
-        if (password !== user.password) {
-            return res.status(401).json({ message: 'Invalid credentials. Incorrect password.' });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid credentials.' });
         }
 
-        // 4. Login successful
-        // In a real app, create a session or JWT token
-        // For now, we'll redirect to the feed
-        res.redirect('/feed');
+        const payload = {
+            _id: user._id
+        };
+
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: '7d' // Token expires in 7 days
+        });
+
+        res.cookie('token', token, {
+            httpOnly: true, // The cookie is not accessible via client-side JS
+            secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
+        res.status(200).json({
+            message: 'Login successful!',
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                userType: user.userType
+            }
+        });
 
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Server error during login.' });
     }
 });
+
+// --- LOGOUT ROUTE ---
+router.post('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.status(200).json({ message: 'Logout successful.' });
+});
+
+// --- CHECK AUTH STATUS ---
+// A route to check if a user is logged in
+router.get('/me', async (req, res) => {
+     try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ message: 'Not authenticated' });
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded._id);
+        if (!user) {
+             return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(401).json({ message: 'Not authenticated' });
+    }
+});
+
 
 module.exports = router;

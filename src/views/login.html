@@ -3,64 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - LinkedOut</title>
-    <!-- Shared Styles -->
+    <title>Login | LinkedOut</title>
     <link rel="stylesheet" href="../public/css/style.css">
     <style>
-        /* Small style override for auth pages */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 2rem 0;
-        }
-        .auth-card {
-            width: 100%;
-            max-width: 450px;
-        }
+        .auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem 0; }
+        .auth-card { width: 100%; max-width: 450px; }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="container navbar">
             <a href="/" class="logo"><div class="logo-icon"></div>LinkedOut</a>
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-            </ul>
-            <div class="nav-buttons">
-                <a href="/register" class="btn btn-register">Register</a>
-            </div>
+            <ul class="nav-links"></ul> <!-- Dynamic -->
+            <div class="nav-buttons"></div> <!-- Dynamic -->
         </div>
     </header>
-
     <main class="auth-container">
         <div class="glass-card auth-card">
             <h2 class="page-title" style="margin-bottom: 2rem;">Welcome Back</h2>
-            
-            <!-- The action attribute will point to the backend login route -->
-            <form action="/api/auth/login" method="POST">
-                
+            <div id="form-message" style="margin-bottom: 1.5rem; text-align: center; font-weight: 500;"></div>
+            <form id="login-form">
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required>
                 </div>
-
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                 </div>
-
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; margin-top: 1rem;">Login</button>
-            
-                <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted-color);">
-                    Don't have an account? <a href="/register" style="color: var(--primary-color); text-decoration: none;">Sign Up</a>
-                </p>
             </form>
+            <p style="text-align: center; margin-top: 1.5rem;">
+                Don't have an account? <a href="/register" style="color: var(--primary-color); text-decoration: none;">Sign Up</a>
+            </p>
         </div>
     </main>
-
-    <!-- General purpose JavaScript file for header consistency -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="../public/js/main.js"></script>
+    <script>
+    $('#login-form').on('submit', function(event) {
+        event.preventDefault();
+        const $formMessage = $('#form-message');
+        $.ajax({
+            url: '/api/auth/login',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                $formMessage.css('color', 'var(--success-color)').text(response.message);
+                if (response.user.userType === 'recruiter') {
+                    window.location.href = '/company-dashboard';
+                } else {
+                    window.location.href = '/feed';
+                }
+            },
+            error: function(jqXHR) {
+                 $formMessage.css('color', 'var(--error-color)').text(jqXHR.responseJSON.message || 'Login failed.');
+            }
+        });
+    });
+    </script>
 </body>
 </html>

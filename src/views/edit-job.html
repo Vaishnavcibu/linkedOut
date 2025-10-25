@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Job | LinkedOut</title>
+    <link rel="stylesheet" href="../public/css/style.css">
+</head>
+<body>
+    <header class="header">
+         <div class="container navbar">
+            <a href="/" class="logo"><div class="logo-icon"></div>LinkedOut</a>
+            <ul class="nav-links"></ul>
+            <div class="nav-buttons"></div>
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 100px; max-width: 800px;">
+        <h2 class="page-title">Edit Job Listing</h2>
+        <div class="glass-card">
+            <form id="edit-job-form">
+                <!-- Form fields will be identical to post-job.html -->
+                <!-- We will populate them with data via JS -->
+                 <div id="form-message" style="margin-bottom: 1.5rem; text-align: center; font-weight: 500;"></div>
+                 <input type="hidden" id="jobId">
+                 <div class="form-group"><label for="title">Job Title</label><input type="text" id="title" class="form-control" required></div>
+                 <div class="form-group"><label for="company">Company Name</label><input type="text" id="company" class="form-control" required></div>
+                 <div class="form-group"><label for="location">Location</label><input type="text" id="location" class="form-control" required></div>
+                 <div class="form-group"><label for="jobType">Job Type</label><select id="jobType" class="form-control" required><option value="internship">Internship</option><option value="full-time">Full-Time</option><option value="part-time">Part-Time</option><option value="volunteer">Volunteer</option></select></div>
+                 <div class="form-group"><label for="description">Job Description</label><textarea id="description" class="form-control" rows="6" required></textarea></div>
+                 <div class="form-group"><label for="skillsRequired">Required Skills (Comma separated)</label><textarea id="skillsRequired" class="form-control" rows="3" required></textarea></div>
+                 <div class="form-group"><label for="salaryDetails">Salary / Stipend Details</label><input type="text" id="salaryDetails" class="form-control"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Update Job</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="../public/js/main.js"></script>
+    <script>
+    $(document).ready(function() {
+        const jobId = window.location.pathname.split('/').pop();
+        $('#jobId').val(jobId);
+
+        // Fetch current job data and populate the form
+        $.get(`/api/jobs/${jobId}`, function(job) {
+            $('#title').val(job.title);
+            $('#company').val(job.company);
+            $('#location').val(job.location);
+            $('#jobType').val(job.jobType);
+            $('#description').val(job.description);
+            $('#skillsRequired').val(job.skillsRequired.join(', '));
+            $('#salaryDetails').val(job.salary ? job.salary.details : '');
+        }).fail(function() {
+            window.location.href = '/company-dashboard';
+        });
+
+        // Handle form submission
+        $('#edit-job-form').on('submit', function(event) {
+            event.preventDefault();
+            const $formMessage = $('#form-message');
+            
+            const updatedJobData = {
+                title: $('#title').val(),
+                company: $('#company').val(),
+                location: $('#location').val(),
+                jobType: $('#jobType').val(),
+                description: $('#description').val(),
+                skillsRequired: $('#skillsRequired').val(),
+                salary: { details: $('#salaryDetails').val() }
+            };
+
+            $.ajax({
+                url: `/api/jobs/${jobId}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(updatedJobData),
+                success: function(response) {
+                    $formMessage.css('color', 'var(--success-color)').text(response.message);
+                    setTimeout(() => window.location.href = '/company-dashboard', 1500);
+                },
+                error: function(jqXHR) {
+                     $formMessage.css('color', 'var(--error-color)').text(jqXHR.responseJSON.message || 'Update failed.');
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
