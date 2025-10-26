@@ -49,6 +49,7 @@ async function generateApplicationCoverLetter(user, job) {
     const masterPrompt = `
         **Role:** You are a highly skilled career coach and professional copywriter. Your task is to draft a complete, compelling, and professional cover letter based on the provided data.
 
+        Instruction: You have to write the cover letter using HTML elements so that it looks neat and professional. The letter should have appropriate line breaks. Assume that tags like <p> or any other tags that usually have the line breaks don't have them and add the line breaks <br> for every block of text.  Dont add template information like [Current Date] or anything like that. Add every relevent information, projects, contacts, experience. Try to add every information in ways that are possible
         **Objective:** Write a cover letter from the applicant, ${user.name}, to the hiring manager at ${job.company} for the specific role of ${job.title}.
 
         ### Applicant's Data:
