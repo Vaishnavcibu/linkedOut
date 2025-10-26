@@ -53,6 +53,7 @@ router.post('/swipe/:jobId/:direction', auth, async (req, res) => {
     try {
         if (direction === 'right') {
             const user = req.user;
+            console.log(user)
             const job = await Job.findById(jobId);
 
             if (user && job && user.resumeUrl) {

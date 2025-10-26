@@ -1,27 +1,29 @@
-/* src/utils/aiHelper.js (Final, Robust Version) */
+/* src/utils/aiHelper.js (Updated for @google/genai) */
 
 // --- DEPENDENCY IMPORTS ---
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI, createUserContent } = require('@google/genai');
 const fs = require('fs').promises;
 const path = require('path');
 const pdf = require('pdf-parse');
-require('dotenv').config(); // Ensure environment variables are loaded
+require('dotenv').config(); // Load environment variables
 
-// --- 1. CONFIGURATION & CONDITIONAL INITIALIZATION ---
+// --- 1. CONFIGURATION ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-let model; // Declare model variable
+let ai = null;
 
 if (GEMINI_API_KEY) {
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    // This is a stable, widely available, and powerful model.
-    model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" }); 
-    console.log("✅ Google AI Helper initialized successfully.");
+    try {
+        ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+        console.log("✅ Google AI Helper initialized successfully.");
+    } catch (err) {
+        console.error("❌ Failed to initialize GoogleGenAI:", err);
+        ai = null;
+    }
 } else {
-    console.warn("!!! WARNING: GEMINI_API_KEY not found in .env file. AI generation will be disabled. !!!");
-    model = null; // Set model to null if no key is found
+    console.warn("⚠️ GEMINI_API_KEY not found in .env file. AI generation will be disabled.");
 }
 
-// --- HELPER FUNCTION FOR PDF PARSING ---
+// --- 2. PDF PARSING HELPER ---
 async function getTextFromPdf(filePath) {
     try {
         const fullPath = path.resolve(filePath);
@@ -34,18 +36,16 @@ async function getTextFromPdf(filePath) {
     }
 }
 
-
-// --- 2. MAIN AI GENERATION FUNCTION ---
+// --- 3. MAIN AI GENERATION FUNCTION ---
 async function generateApplicationCoverLetter(user, job) {
-    // Fail gracefully if the model was never initialized
-    if (!model) {
+    if (!ai) {
         console.error("Attempted to call generateApplicationCoverLetter, but AI model is not configured.");
         return "AI Model is not configured. Please check the server's GEMINI_API_KEY.";
     }
 
     const resumeText = user.resumeUrl ? await getTextFromPdf(user.resumeUrl) : 'No resume provided.';
-    
-    // --- 3. ROBUST PROMPT ENGINEERING ---
+
+    // --- Prompt ---
     const masterPrompt = `
         **Role:** You are a highly skilled career coach and professional copywriter. Your task is to draft a complete, compelling, and professional cover letter based on the provided data.
 
@@ -75,27 +75,29 @@ async function generateApplicationCoverLetter(user, job) {
         5.  **Output:** Respond ONLY with the raw text of the cover letter. Do not include any introductory text, explanations, or markdown formatting. Start directly with the salutation (e.g., "Dear Hiring Manager,").
     `;
 
-    // --- 4. API CALL WITH ERROR HANDLING ---
+    // --- 4. AI CALL ---
     try {
         console.log(`--- Calling Gemini API for cover letter generation for user ${user._id}... ---`);
-        const result = await model.generateContent(masterPrompt);
-        const response = await result.response;
-        const generatedText = response.text();
-
-        console.log("--- Successfully received AI-generated cover letter. ---");
-        return generatedText;
         
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash", // new model naming convention
+            contents: [createUserContent([masterPrompt])],
+        });
+
+        const generatedText = response.text;
+        console.log("--- Successfully received AI-generated cover letter. ---");
+
+        return generatedText;
     } catch (error) {
         console.error("!!! CRITICAL: An error occurred while calling the AI model:", error.message || error);
-        
-        // Return a user-friendly error message that still gets stored in the application
+
         let errorMessage = `An error occurred with the AI service: ${error.message}`;
-        if (error.message && error.message.includes('404')) {
-             errorMessage = "AI Generation Failed: The specified model was not found. This indicates a problem with the API key or project configuration on the server.";
-        } else if (error.message && error.message.includes('API key not valid')) {
+        if (error.message?.includes('404')) {
+            errorMessage = "AI Generation Failed: The specified model was not found. This indicates a problem with the API key or project configuration on the server.";
+        } else if (error.message?.includes('API key not valid')) {
             errorMessage = "AI Generation Failed: The API key is invalid. Please check the server configuration.";
         }
-        
+
         return `[Automated Message: The AI-generated cover letter could not be created. Reason: ${errorMessage}]`;
     }
 }
