@@ -48,6 +48,9 @@ app.get('/edit-job/:id', (req, res) => res.sendFile(path.join(__dirname, 'src', 
 app.get('/job-details/:id', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'views', 'job-details.html'));
 });
+app.get('/applied-jobs', (req, res) => {
+    res.sendFile(path.join(__dirname, 'src', 'views', 'applied-jobs.html'));
+});
 
 
 app.listen(PORT, () => {

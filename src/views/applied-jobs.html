@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications | LinkedOut</title>
+    <link rel="stylesheet" href="../public/css/style.css">
+    <style>
+        .job-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+        }
+        .job-item:last-child { border-bottom: none; }
+        .job-info { line-height: 1.4; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container navbar">
+            <a href="/" class="logo"><div class="logo-icon"></div>LinkedOut</a>
+            <ul class="nav-links"></ul> <!-- Dynamic -->
+            <div class="nav-buttons"></div> <!-- Dynamic -->
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 100px; max-width: 900px;">
+        <h1 class="page-title">My Applications</h1>
+        <div id="job-list-container" class="glass-card" style="padding: 1rem 2rem;">
+            <!-- Applied job listings will be dynamically inserted here -->
+            <p style="text-align: center;">Loading your applications...</p>
+        </div>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="../public/js/main.js"></script>
+    <script>
+        $(document).ready(function() {
+            const jobList = $('#job-list-container');
+
+            function loadAppliedJobs() {
+                $.get('/api/users/applied-jobs', function(appliedJobs) {
+                    jobList.empty(); // Clear the "Loading..." message
+
+                    if (appliedJobs.length === 0) {
+                        jobList.html('<p style="padding: 1rem; text-align: center;">You have not applied to any jobs yet. Start swiping on the Feed!</p>');
+                        return;
+                    }
+
+                    appliedJobs.forEach(job => {
+                        // ** CHANGE IS HERE: Added a functional "Unapply" button **
+                        jobList.append(`
+                            <div class="job-item" id="job-item-${job._id}">
+                                <div class="job-info">
+                                    <h4 style="font-size: 1.2rem;">${job.title}</h4>
+                                    <p style="color: var(--text-muted-color);">${job.company} - ${job.location}</p>
+                                </div>
+                                <button class="btn btn-login unapply-btn" data-jobid="${job._id}">Unapply</button>
+                            </div>
+                        `);
+                    });
+                }).fail(function() {
+                    // This happens if the user is not authenticated
+                    window.location.href = '/login';
+                });
+            }
+
+            // ** NEW LOGIC: Handle click on the unapply button **
+            jobList.on('click', '.unapply-btn', function() {
+                const jobId = $(this).data('jobid');
+                const $button = $(this);
+
+                if (confirm('Are you sure you want to withdraw this application?')) {
+                    $.ajax({
+                        url: `/api/users/applied-jobs/${jobId}`,
+                        type: 'DELETE',
+                        beforeSend: function() {
+                            $button.prop('disabled', true).text('Withdrawing...');
+                        },
+                        success: function(response) {
+                            // On success, remove the job item from the view
+                            $button.closest('.job-item').slideUp(300, function() {
+                                $(this).remove();
+                                if (jobList.children('.job-item').length === 0) {
+                                    jobList.html('<p style="padding: 1rem; text-align: center;">All applications withdrawn.</p>');
+                                }
+                            });
+                        },
+                        error: function(jqXHR) {
+                            alert(jqXHR.responseJSON.message || 'Could not withdraw application.');
+                            $button.prop('disabled', false).text('Unapply');
+                        }
+                    });
+                }
+            });
+
+            // Initial load of jobs
+            loadAppliedJobs();
+        });
+    </script>
+</body>
+</html>

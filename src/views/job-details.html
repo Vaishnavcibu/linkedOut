@@ -4,55 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Details | LinkedOut</title>
+    <!-- Global stylesheet -->
     <link rel="stylesheet" href="../public/css/style.css">
+    
+    <!-- Page-specific styles -->
     <style>
-        .details-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+        .page-container {
+            padding-top: 100px;
+            padding-bottom: 4rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: var(--text-muted-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-color);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
         .applicant-card {
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
+            padding: 1.5rem 0;
         }
-        .applicant-card:last-child { border-bottom: none; }
+        .applicant-card:last-child {
+            border-bottom: none;
+            padding-bottom: 0.5rem;
+        }
+
         .skills-list span {
-            display: inline-block; background-color: rgba(255,255,255,0.1);
-            padding: 0.3rem 0.6rem; border-radius: 12px; margin: 0.2rem;
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            margin: 0.25rem;
             font-size: 0.85rem;
+            font-weight: 500;
         }
-        @media (max-width: 768px) {
-            .details-grid { grid-template-columns: 1fr; }
+        
+        .cover-letter-content {
+            display: none; /* Hidden by default */
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            white-space: pre-wrap; /* Preserves formatting */
+            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        /* Make layout a single column on smaller screens */
+        @media (max-width: 992px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="header"><!-- Dynamic Header --></header>
+    <!-- 1. CORRECTED HEADER STRUCTURE -->
+    <header class="header">
+        <div class="container navbar">
+            <a href="/" class="logo"><div class="logo-icon"></div>LinkedOut</a>
+            <ul class="nav-links"></ul> <!-- main.js will populate this -->
+            <div class="nav-buttons"></div> <!-- main.js will populate this -->
+        </div>
+    </header>
 
-    <main class="container" style="padding-top: 100px;">
-        <div style="margin-bottom: 2rem;">
-            <a href="/company-dashboard" style="color: var(--text-muted-color); text-decoration: none;">&larr; Back to Dashboard</a>
+    <main class="container page-container">
+        <div>
+            <a href="/company-dashboard" class="back-link">&larr; Back to Dashboard</a>
         </div>
     
         <div class="details-grid">
-            <!-- Column 1: Job Details -->
+            <!-- Column 1: Job Details Card -->
             <div id="job-details-section">
                 <div class="glass-card">
-                    <h1 id="job-title" class="page-title" style="text-align: left; margin-bottom: 0.5rem;"></h1>
-                    <p id="job-company-location" style="color: var(--text-muted-color); font-size: 1.1rem; margin-bottom: 1.5rem;"></p>
-                    <p id="job-description"></p>
-                    <h3 style="margin-top: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Required Skills</h3>
-                    <div id="job-skills-list" class="skills-list" style="margin-top: 1rem;"></div>
-                     <div style="margin-top: 2rem; text-align: right;">
-                        <a id="edit-job-link" href="#" class="btn btn-primary">Edit Job</a>
+                    <h1 id="job-title" class="page-title" style="text-align: left; margin-bottom: 0.5rem; line-height: 1.2;"></h1>
+                    <p id="job-company-location" style="color: var(--text-muted-color); font-size: 1.1rem; margin-bottom: 2rem;"></p>
+                    
+                    <h3 style="margin-bottom: 0.5rem;">Job Description</h3>
+                    <p id="job-description" style="line-height: 1.6;"></p>
+
+                    <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">Required Skills</h3>
+                    <div id="job-skills-list" class="skills-list"></div>
+
+                     <div style="margin-top: 2rem; text-align: right; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                        <a id="edit-job-link" href="#" class="btn btn-primary">Edit Job Details</a>
                      </div>
                 </div>
             </div>
 
-            <!-- Column 2: Application Statistics -->
+            <!-- Column 2: Statistics & Applicants Card -->
             <div>
                 <div class="glass-card">
-                    <h2>Statistics</h2>
-                    <h1 id="application-count" style="font-size: 3rem; margin: 1rem 0;"></h1>
-                    <h4>Applicants</h4>
-                    <div id="applicant-list" style="margin-top: 1rem; max-height: 500px; overflow-y: auto;">
-                        <!-- Applicant cards will be inserted here -->
+                    <h2 style="margin-bottom: 0.5rem;">Statistics</h2>
+                    <h1 id="application-count" style="font-size: 3.5rem; color: var(--primary-color); line-height: 1;"></h1>
+                    <h4 style="color: var(--text-muted-color);">Total Applicants</h4>
+                    
+                    <h3 style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">Applicant List</h3>
+                    <div id="applicant-list" style="margin-top: 1rem;">
+                        <!-- Applicant cards will be inserted here by JavaScript -->
                     </div>
                 </div>
             </div>
@@ -68,34 +131,53 @@
             const $applicantList = $('#applicant-list');
 
             $.get(`/api/jobs/${jobId}/details`, function(data) {
-                // Populate Job Details
+                // Populate Job Details Column
                 $jobDetailsSection.find('#job-title').text(data.job.title);
                 $jobDetailsSection.find('#job-company-location').text(`${data.job.company} - ${data.job.location}`);
                 $jobDetailsSection.find('#job-description').text(data.job.description);
                 $jobDetailsSection.find('#job-skills-list').html(data.job.skillsRequired.map(s => `<span>${s}</span>`).join(''));
                 $jobDetailsSection.find('#edit-job-link').attr('href', `/edit-job/${jobId}`);
 
-                // Populate Statistics
+                // Populate Statistics Column
                 $('#application-count').text(data.applicationCount);
 
-                // Populate Applicant List
-                if (data.applicants.length === 0) {
+                if (data.applications.length === 0) {
                     $applicantList.html('<p>No applications yet.</p>');
                 } else {
                     $applicantList.empty();
-                    data.applicants.forEach(applicant => {
+                    data.applications.forEach(app => {
+                        const applicant = app.applicant;
+                        if (!applicant) return; 
+
                         $applicantList.append(`
                             <div class="applicant-card">
                                 <strong>${applicant.name}</strong>
                                 <p style="font-size: 0.9rem; color: var(--text-muted-color);">${applicant.email}</p>
-                                <div class="skills-list" style="margin-top: 0.5rem;">${applicant.skills.map(s => `<span>${s}</span>`).join('')}</div>
-                                <a href="/${applicant.resumeUrl.replace(/\\/g, '/')}" target="_blank" style="margin-top: 0.5rem; display: inline-block;">View Resume</a>
+                                <div class="skills-list" style="margin-top: 0.5rem;">
+                                    ${applicant.skills.map(s => `<span>${s}</span>`).join('') || '<span style="opacity: 0.6;">No skills listed.</span>'}
+                                </div>
+                                <div style="margin-top: 1rem;">
+                                    <a href="/${applicant.resumeUrl.replace(/\\/g, '/')}" target="_blank" class="btn btn-login" style="margin-right: 0.5rem;">View Resume</a>
+                                    <button class="btn show-letter-btn" data-target="#letter-${app._id}">Show Letter</button>
+                                </div>
+                                <div class="cover-letter-content" id="letter-${app._id}">${app.coverLetter}</div>
                             </div>
                         `);
                     });
                 }
             }).fail(function() {
                 $('main').html('<h2 class="page-title">Could not load job details.</h2><p style="text-align: center;"><a href="/company-dashboard">Return to dashboard.</a></p>');
+            });
+
+            // Event handler to show/hide the cover letter
+            $applicantList.on('click', '.show-letter-btn', function() {
+                const targetId = $(this).data('target');
+                const $letterContent = $(targetId);
+                const isVisible = $letterContent.is(':visible');
+                
+                $letterContent.slideToggle(300);
+
+                $(this).text(isVisible ? 'Show Letter' : 'Hide Letter');
             });
         });
     </script>

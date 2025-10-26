@@ -72,5 +72,39 @@ router.post('/profile', auth, upload.single('resume'), async (req, res) => {
     }
 });
 
+router.get('/applied-jobs', auth, async (req, res) => {
+    try {
+        // req.user._id comes from the auth middleware
+        // We find the user and populate the 'appliedJobs' field
+        const userWithJobs = await User.findById(req.user._id).populate('appliedJobs');
+
+        if (!userWithJobs) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json(userWithJobs.appliedJobs);
+    } catch (error) {
+        console.error('Error fetching applied jobs:', error);
+        res.status(500).json({ message: 'Server error while fetching applied jobs.' });
+    }
+});
+
+// Endpoint: DELETE /api/users/applied-jobs/:jobId
+router.delete('/applied-jobs/:jobId', auth, async (req, res) => {
+    try {
+        const { jobId } = req.params;
+
+        // Use $pull to remove the jobId from the user's appliedJobs array
+        await User.findByIdAndUpdate(req.user._id, {
+            $pull: { appliedJobs: jobId }
+        });
+
+        res.status(200).json({ message: 'Application withdrawn successfully.' });
+    } catch (error) {
+        console.error('Error withdrawing application:', error);
+        res.status(500).json({ message: 'Server error while withdrawing application.' });
+    }
+});
+
 
 module.exports = router;
